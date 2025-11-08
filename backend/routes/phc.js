@@ -31,20 +31,25 @@ router.get('/list', (req, res) => {
   
   query += ' ORDER BY name';
   
-  db.all(query, params, (err, rows) => {
-    if (err) {
-      console.error('Error fetching PHCs:', err);
-      return res.status(500).json({ error: 'Failed to fetch PHCs' });
+  try {
+    const stmt = db.prepare(query);
+    stmt.bind(params);
+    const rows = [];
+    while (stmt.step()) {
+      rows.push(stmt.getAsObject());
     }
-    
+
     // Parse services JSON
     const phcs = rows.map(row => ({
       ...row,
       services: JSON.parse(row.services || '[]')
     }));
-    
+
     res.json({ success: true, data: phcs });
-  });
+  } catch (err) {
+    console.error('Error fetching PHCs:', err);
+    return res.status(500).json({ error: 'Failed to fetch PHCs' });
+  }
 });
 
 // PUT /api/phc/update - Update PHC information
@@ -122,24 +127,26 @@ router.post('/create', (req, res) => {
 router.get('/:id', (req, res) => {
   const db = getDB();
   const { id } = req.params;
-  
-  db.get('SELECT * FROM phcs WHERE id = ?', [id], (err, row) => {
-    if (err) {
-      console.error('Error fetching PHC:', err);
-      return res.status(500).json({ error: 'Failed to fetch PHC' });
-    }
-    
+
+  try {
+    const stmt = db.prepare('SELECT * FROM phcs WHERE id = ?');
+    stmt.bind([id]);
+    const row = stmt.step() ? stmt.getAsObject() : null;
+
     if (!row) {
       return res.status(404).json({ error: 'PHC not found' });
     }
-    
+
     const phc = {
       ...row,
       services: JSON.parse(row.services || '[]')
     };
-    
+
     res.json({ success: true, data: phc });
-  });
+  } catch (err) {
+    console.error('Error fetching PHC:', err);
+    return res.status(500).json({ error: 'Failed to fetch PHC' });
+  }
 });
 
 module.exports = router;

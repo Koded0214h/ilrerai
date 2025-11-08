@@ -1,122 +1,105 @@
-const sqlite3 = require('sqlite3').verbose();
+const initSqlJs = require('sql.js');
+const fs = require('fs');
 const path = require('path');
 
 const dbPath = path.join(__dirname, '../data/ilerai.db');
 let db;
 
-const initDatabase = () => {
-  return new Promise((resolve, reject) => {
-    db = new sqlite3.Database(dbPath, (err) => {
-      if (err) {
-        console.error('Error opening database:', err);
-        reject(err);
-        return;
-      }
-      console.log('📊 Connected to SQLite database');
-      
-      // Create tables
-      createTables().then(resolve).catch(reject);
-    });
-  });
+const initDatabase = async () => {
+  try {
+    const SQL = await initSqlJs();
+    const filebuffer = fs.existsSync(dbPath) ? fs.readFileSync(dbPath) : null;
+    db = new SQL.Database(filebuffer);
+
+    console.log('📊 Connected to SQLite database');
+    createTables();
+    seedData();
+    return db;
+  } catch (err) {
+    console.error('Error opening database:', err);
+    throw err;
+  }
 };
 
 const createTables = () => {
-  return new Promise((resolve, reject) => {
-    const queries = [
-      // PHC table
-      `CREATE TABLE IF NOT EXISTS phcs (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        location TEXT NOT NULL,
-        phone TEXT NOT NULL,
-        status TEXT DEFAULT 'open',
-        services TEXT,
-        hours TEXT DEFAULT '8:00 AM - 5:00 PM',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )`,
-      
-      // Patients table
-      `CREATE TABLE IF NOT EXISTS patients (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        phone TEXT UNIQUE NOT NULL,
-        pin TEXT NOT NULL,
-        phc_id TEXT,
-        risk_level TEXT DEFAULT 'low',
-        next_appointment DATETIME,
-        last_visit DATETIME,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (phc_id) REFERENCES phcs (id)
-      )`,
-      
+  const queries = [
+    // PHC table
+    `CREATE TABLE IF NOT EXISTS phcs (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      location TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      status TEXT DEFAULT 'open',
+      services TEXT,
+      hours TEXT DEFAULT '8:00 AM - 5:00 PM',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
 
-      
-      // USSD sessions table
-      `CREATE TABLE IF NOT EXISTS ussd_sessions (
-        session_id TEXT PRIMARY KEY,
-        phone_number TEXT NOT NULL,
-        current_menu TEXT DEFAULT 'main',
-        user_data TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )`,
-      
-      // Messages table
-      `CREATE TABLE IF NOT EXISTS messages (
-        id TEXT PRIMARY KEY,
-        phone_number TEXT NOT NULL,
-        message TEXT NOT NULL,
-        type TEXT DEFAULT 'sms',
-        status TEXT DEFAULT 'sent',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )`,
-      
-      // Staff table
-      `CREATE TABLE IF NOT EXISTS staff (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        phc_id TEXT,
-        verification_token TEXT,
-        email_verified INTEGER DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (phc_id) REFERENCES phcs (id)
-      )`,
-      
+    // Patients table
+    `CREATE TABLE IF NOT EXISTS patients (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      phone TEXT UNIQUE NOT NULL,
+      pin TEXT NOT NULL,
+      phc_id TEXT,
+      risk_level TEXT DEFAULT 'low',
+      next_appointment DATETIME,
+      last_visit DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (phc_id) REFERENCES phcs (id)
+    )`,
 
-      
-      // Email verification tokens
-      `CREATE TABLE IF NOT EXISTS verification_tokens (
-        id TEXT PRIMARY KEY,
-        email TEXT NOT NULL,
-        token TEXT NOT NULL,
-        type TEXT DEFAULT 'email_verification',
-        expires_at DATETIME NOT NULL,
-        used BOOLEAN DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )`
-    ];
-    
-    let completed = 0;
-    queries.forEach((query, index) => {
-      db.run(query, (err) => {
-        if (err && !err.message.includes('duplicate column name')) {
-          console.error(`Error creating table ${index}:`, err);
-          reject(err);
-          return;
-        }
-        completed++;
-        if (completed === queries.length) {
-          console.log('✅ Database tables created successfully');
-          seedData().then(resolve).catch(reject);
-        }
-      });
-    });
+    // USSD sessions table
+    `CREATE TABLE IF NOT EXISTS ussd_sessions (
+      session_id TEXT PRIMARY KEY,
+      phone_number TEXT NOT NULL,
+      current_menu TEXT DEFAULT 'main',
+      user_data TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+
+    // Messages table
+    `CREATE TABLE IF NOT EXISTS messages (
+      id TEXT PRIMARY KEY,
+      phone_number TEXT NOT NULL,
+      message TEXT NOT NULL,
+      type TEXT DEFAULT 'sms',
+      status TEXT DEFAULT 'sent',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+
+    // Staff table
+    `CREATE TABLE IF NOT EXISTS staff (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      phc_id TEXT,
+      verification_token TEXT,
+      email_verified INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (phc_id) REFERENCES phcs (id)
+    )`,
+
+    // Email verification tokens
+    `CREATE TABLE IF NOT EXISTS verification_tokens (
+      id TEXT PRIMARY KEY,
+      email TEXT NOT NULL,
+      token TEXT NOT NULL,
+      type TEXT DEFAULT 'email_verification',
+      expires_at DATETIME NOT NULL,
+      used BOOLEAN DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`
+  ];
+
+  queries.forEach((query) => {
+    db.run(query);
   });
+  console.log('✅ Database tables created successfully');
 };
 
 const seedData = () => {
-  return new Promise((resolve, reject) => {
     // Insert sample PHCs
     const phcs = [
       {
@@ -147,7 +130,7 @@ const seedData = () => {
         hours: '9:00 AM - 4:00 PM'
       }
     ];
-    
+
     // Insert sample staff
     const staff = [
       {
@@ -167,7 +150,7 @@ const seedData = () => {
         email_verified: 1
       }
     ];
-    
+
     // Insert sample patients
     const patients = [
       {
@@ -201,61 +184,40 @@ const seedData = () => {
         last_visit: '2024-01-01 16:45:00'
       }
     ];
-    
-    let insertCount = 0;
-    const totalInserts = phcs.length + patients.length + staff.length;
-    
-    // Insert PHCs
-    phcs.forEach(phc => {
-      db.run(
-        `INSERT OR IGNORE INTO phcs (id, name, location, phone, status, services, hours) 
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [phc.id, phc.name, phc.location, phc.phone, phc.status, phc.services, phc.hours],
-        (err) => {
-          if (err) console.error('Error inserting PHC:', err);
-          insertCount++;
-          if (insertCount === totalInserts) {
-            console.log('🌱 Sample data seeded successfully');
-            resolve();
-          }
-        }
+
+    try {
+      // Insert PHCs
+      const insertPhc = db.prepare(
+        `INSERT OR IGNORE INTO phcs (id, name, location, phone, status, services, hours)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`
       );
-    });
-    
-    // Insert staff
-    staff.forEach(staffMember => {
-      db.run(
-        `INSERT OR IGNORE INTO staff (id, name, email, password, phc_id, email_verified) 
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [staffMember.id, staffMember.name, staffMember.email, staffMember.password, staffMember.phc_id, staffMember.email_verified || 0],
-        (err) => {
-          if (err) console.error('Error inserting staff:', err);
-          insertCount++;
-          if (insertCount === totalInserts) {
-            console.log('🌱 Sample data seeded successfully');
-            resolve();
-          }
-        }
+      phcs.forEach(phc => {
+        insertPhc.run(phc.id, phc.name, phc.location, phc.phone, phc.status, phc.services, phc.hours);
+      });
+
+      // Insert staff
+      const insertStaff = db.prepare(
+        `INSERT OR IGNORE INTO staff (id, name, email, password, phc_id, email_verified)
+         VALUES (?, ?, ?, ?, ?, ?)`
       );
-    });
-    
-    // Insert patients
-    patients.forEach(patient => {
-      db.run(
-        `INSERT OR IGNORE INTO patients (id, name, phone, pin, phc_id, risk_level, next_appointment, last_visit) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [patient.id, patient.name, patient.phone, patient.pin, patient.phc_id, patient.risk_level, patient.next_appointment, patient.last_visit],
-        (err) => {
-          if (err) console.error('Error inserting patient:', err);
-          insertCount++;
-          if (insertCount === totalInserts) {
-            console.log('🌱 Sample data seeded successfully');
-            resolve();
-          }
-        }
+      staff.forEach(staffMember => {
+        insertStaff.run(staffMember.id, staffMember.name, staffMember.email, staffMember.password, staffMember.phc_id, staffMember.email_verified || 0);
+      });
+
+      // Insert patients
+      const insertPatient = db.prepare(
+        `INSERT OR IGNORE INTO patients (id, name, phone, pin, phc_id, risk_level, next_appointment, last_visit)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
       );
-    });
-  });
+      patients.forEach(patient => {
+        insertPatient.run(patient.id, patient.name, patient.phone, patient.pin, patient.phc_id, patient.risk_level, patient.next_appointment, patient.last_visit);
+      });
+
+      console.log('🌱 Sample data seeded successfully');
+    } catch (err) {
+      console.error('Error seeding data:', err);
+      throw err;
+    }
 };
 
 const getDB = () => db;
