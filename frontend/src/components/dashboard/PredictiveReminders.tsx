@@ -1,6 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useRealtime } from '@/hooks/useRealtime';
-import aiService, { Patient, PredictionResult } from '@/lib/ai-service';
+import aiService from '@/lib/ai-service';
+
+// Define types locally for now
+interface Patient {
+  id: string;
+  name: string;
+  risk_level: string;
+  next_appointment: string;
+  // Add other patient properties as needed
+}
+
+interface PredictionResult {
+  patientId: string;
+  riskScore: number;
+  recommendation: string;
+}
 
 export default function PredictiveReminders() {
   const [predictions, setPredictions] = useState<PredictionResult[]>([]);

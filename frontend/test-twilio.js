@@ -17,7 +17,7 @@ async function testTwilio() {
     const message = await client.messages.create({
       body: 'Test SMS from IlerAI PHC system! Your setup is working.',
       from: process.env.TWILIO_PHONE_NUMBER,
-      to: '+2348012345678' // Replace with actual patient number for testing
+      to: '+2347041911443' // Replace with actual patient number for testing
     });
     
     console.log('✅ SMS sent successfully:', message.sid);

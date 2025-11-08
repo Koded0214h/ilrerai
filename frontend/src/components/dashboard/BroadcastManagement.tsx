@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { addAlert } from "../../store/slices/alertSlice";
 import { Send, Users, MessageSquare, Clock } from "lucide-react";
@@ -16,15 +16,19 @@ export default function BroadcastManagement() {
     emergency: "Important: Please contact the facility immediately regarding your health status.",
   };
 
+  useEffect(() => {
+    handleTemplateSelect(messageType);
+  }, [messageType]);
+
   const getAudienceCount = () => {
     switch (selectedAudience) {
       case "all":
         return patients.length;
       case "high_risk":
-        return patients.filter((p) => p.riskLevel === "high").length;
+        return patients.filter((p) => p.risk_level === "high").length;
       case "overdue":
         const today = new Date();
-        return patients.filter((p) => new Date(p.nextAppointment) < today).length;
+        return patients.filter((p) => new Date(p.next_appointment) < today).length;
       default:
         return 0;
     }
@@ -52,7 +56,9 @@ export default function BroadcastManagement() {
   };
 
   const handleTemplateSelect = (template: string) => {
-    setMessage(messageTemplates[template as keyof typeof messageTemplates]);
+    if (template in messageTemplates) {
+      setMessage(messageTemplates[template as keyof typeof messageTemplates]);
+    }
   };
 
   return (
@@ -92,19 +98,19 @@ export default function BroadcastManagement() {
             </label>
             <div className="flex flex-wrap gap-2">
               <button
-                onClick={() => handleTemplateSelect("reminder")}
+                onClick={() => setMessageType("reminder")}
                 className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm hover:bg-blue-200"
               >
                 Appointment Reminder
               </button>
               <button
-                onClick={() => handleTemplateSelect("health_tip")}
+                onClick={() => setMessageType("health_tip")}
                 className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm hover:bg-green-200"
               >
                 Health Tip
               </button>
               <button
-                onClick={() => handleTemplateSelect("emergency")}
+                onClick={() => setMessageType("emergency")}
                 className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm hover:bg-red-200"
               >
                 Emergency Alert
@@ -174,13 +180,13 @@ export default function BroadcastManagement() {
               <div className="flex justify-between">
                 <span className="text-text-body">High Risk</span>
                 <span className="font-medium text-red-600">
-                  {patients.filter((p) => p.riskLevel === "high").length}
+                  {patients.filter((p) => p.risk_level === "high").length}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-text-body">Overdue</span>
                 <span className="font-medium text-yellow-600">
-                  {patients.filter((p) => new Date(p.nextAppointment) < new Date()).length}
+                  {patients.filter((p) => new Date(p.next_appointment) < new Date()).length}
                 </span>
               </div>
             </div>

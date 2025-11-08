@@ -1,21 +1,26 @@
 import { useState } from 'react';
+import { useAppSelector } from '../../store/hooks';
 import aiService from '@/lib/ai-service';
 
 export default function InsightsDashboard() {
-  const [insights, setInsights] = useState<string>('');
+  const [insights, setInsights] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const sampleData = {
-    totalVisits: 150,
-    missedAppointments: 25,
-    averageDistance: 8.5,
-    peakHours: ['9AM-11AM', '2PM-4PM'],
-    commonServices: ['Vaccination', 'Consultation', 'Health Screening']
-  };
+  const { totalPatients, highRiskCount, adherenceRate } = useAppSelector(
+    (state) => state.patients
+  );
+  const { services, drugStock } = useAppSelector((state) => state.facility);
 
   const generateInsights = async () => {
     setLoading(true);
-    const result = await aiService.generateInsights(sampleData);
+    const facilityData = {
+      totalPatients,
+      highRiskCount,
+      adherenceRate,
+      activeServices: services.length,
+      lowStockDrugs: Object.values(drugStock).filter((qty) => qty <= 20).length,
+    };
+    const result = await aiService.generateFacilityInsights(facilityData);
     setInsights(result);
     setLoading(false);
   };
@@ -26,20 +31,20 @@ export default function InsightsDashboard() {
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="text-center p-3 bg-blue-50 rounded">
-          <div className="text-2xl font-bold text-blue-600">{sampleData.totalVisits}</div>
-          <div className="text-sm text-gray-600">Total Visits</div>
+          <div className="text-2xl font-bold text-blue-600">{totalPatients}</div>
+          <div className="text-sm text-gray-600">Total Patients</div>
         </div>
         <div className="text-center p-3 bg-red-50 rounded">
-          <div className="text-2xl font-bold text-red-600">{sampleData.missedAppointments}</div>
-          <div className="text-sm text-gray-600">Missed</div>
+          <div className="text-2xl font-bold text-red-600">{highRiskCount}</div>
+          <div className="text-sm text-gray-600">High Risk</div>
         </div>
         <div className="text-center p-3 bg-green-50 rounded">
-          <div className="text-2xl font-bold text-green-600">{sampleData.averageDistance}km</div>
-          <div className="text-sm text-gray-600">Avg Distance</div>
+          <div className="text-2xl font-bold text-green-600">{adherenceRate}%</div>
+          <div className="text-sm text-gray-600">Adherence</div>
         </div>
         <div className="text-center p-3 bg-purple-50 rounded">
-          <div className="text-2xl font-bold text-purple-600">{sampleData.peakHours.length}</div>
-          <div className="text-sm text-gray-600">Peak Hours</div>
+          <div className="text-2xl font-bold text-purple-600">{services.length}</div>
+          <div className="text-sm text-gray-600">Services</div>
         </div>
       </div>
 
@@ -51,10 +56,14 @@ export default function InsightsDashboard() {
         {loading ? 'Generating...' : 'Generate AI Insights'}
       </button>
 
-      {insights && (
+      {insights.length > 0 && (
         <div className="p-4 bg-gray-50 rounded border">
           <h3 className="font-semibold mb-2">AI Analysis:</h3>
-          <p className="text-sm whitespace-pre-wrap">{insights}</p>
+          <ul className="list-disc list-inside text-sm space-y-1">
+            {insights.map((insight, index) => (
+              <li key={index}>{insight}</li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
