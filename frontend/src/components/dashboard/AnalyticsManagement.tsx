@@ -16,7 +16,7 @@ export default function AnalyticsManagement() {
 
   const getOverdueAppointments = () => {
     const today = new Date();
-    return patients.filter((p) => new Date(p.next_appointment) < today).length;
+    return patients.filter((p) => p.next_appointment && new Date(p.next_appointment) < today).length;
   };
 
   const getDrugStockStatus = () => {

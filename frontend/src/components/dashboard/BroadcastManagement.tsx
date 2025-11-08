@@ -28,7 +28,7 @@ export default function BroadcastManagement() {
         return patients.filter((p) => p.risk_level === "high").length;
       case "overdue":
         const today = new Date();
-        return patients.filter((p) => new Date(p.next_appointment) < today).length;
+        return patients.filter((p) => p.next_appointment && new Date(p.next_appointment) < today).length;
       default:
         return 0;
     }
@@ -186,7 +186,7 @@ export default function BroadcastManagement() {
               <div className="flex justify-between">
                 <span className="text-text-body">Overdue</span>
                 <span className="font-medium text-yellow-600">
-                  {patients.filter((p) => new Date(p.next_appointment) < new Date()).length}
+                  {patients.filter((p) => p.next_appointment && new Date(p.next_appointment) < new Date()).length}
                 </span>
               </div>
             </div>

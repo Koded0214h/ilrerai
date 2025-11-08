@@ -84,7 +84,7 @@ class AIService {
 
       const data = await response.json();
       const insights = data.choices?.[0]?.message?.content || '';
-      return insights.split('\n').filter(line => line.trim()).slice(0, 3);
+      return insights.split('\n').filter((line: string) => line.trim()).slice(0, 3);
     } catch (error) {
       console.error('AI insights error:', error);
       return [
@@ -118,7 +118,7 @@ class AIService {
 
       const data = await response.json();
       const insights = data.choices?.[0]?.message?.content || '';
-      return insights.split('\n').filter(line => line.trim()).slice(0, 3);
+      return insights.split('\n').filter((line: string) => line.trim()).slice(0, 3);
     } catch (error) {
       console.error('AI facility insights error:', error);
       return [
@@ -126,6 +126,36 @@ class AIService {
         'Target patients with high missed appointments for follow-up',
         'Promote underutilized services to the community'
       ];
+    }
+  }
+
+  async predictMissedVisits(patients: any[]) {
+    try {
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [{
+            role: 'system',
+            content: 'You are a healthcare AI that predicts patient appointment adherence. Analyze patient data and return predictions for missed visits.'
+          }, {
+            role: 'user',
+            content: `Predict which patients are likely to miss their next appointment based on this data: ${JSON.stringify(patients)}. Return a JSON array of patient IDs with risk scores.`
+          }],
+          max_tokens: 300
+        })
+      });
+
+      const data = await response.json();
+      const predictions = data.choices?.[0]?.message?.content || '[]';
+      return JSON.parse(predictions);
+    } catch (error) {
+      console.error('AI prediction error:', error);
+      return [];
     }
   }
 

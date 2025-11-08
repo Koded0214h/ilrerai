@@ -1,6 +1,12 @@
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { useEffect, useRef, useState } from "react";
 
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
 interface MapProps {
   center: { lat: number; lng: number };
   zoom: number;
@@ -14,7 +20,7 @@ interface MapProps {
 
 const MapComponent = ({ center, zoom, markers }: MapProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<google.maps.Map>();
+  const [map, setMap] = useState<any>();
 
   useEffect(() => {
     if (ref.current && !map) {

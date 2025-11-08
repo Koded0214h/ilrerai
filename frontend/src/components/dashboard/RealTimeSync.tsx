@@ -11,7 +11,7 @@ export default function RealTimeSync() {
   useEffect(() => {
     // Monitor connection status
     const checkConnection = () => {
-      setIsConnected(socketService.socket.connected);
+      setIsConnected(socketService.isConnected());
     };
 
     const interval = setInterval(checkConnection, 1000);
