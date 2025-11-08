@@ -62,12 +62,6 @@ export default function FacilityManagement() {
   };
 
   const handleServiceToggle = (service: string) => {
-    const updated = selectedServices.includes(service)
-      ? selectedServices.filter((s: string) => s !== service)
-      : selectedServices.length >= 5
-      ? selectedServices
-      : [...selectedServices, service];
-
     if (selectedServices.length >= 5 && !selectedServices.includes(service)) {
       dispatch(
         addAlert({
@@ -77,6 +71,10 @@ export default function FacilityManagement() {
       );
       return;
     }
+
+    const updated = selectedServices.includes(service)
+      ? selectedServices.filter((s: string) => s !== service)
+      : [...selectedServices, service];
 
     setSelectedServices(updated);
     dispatch(updateServices(updated));

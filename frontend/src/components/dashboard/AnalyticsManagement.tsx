@@ -8,15 +8,15 @@ export default function AnalyticsManagement() {
   const { isOpen, services, drugStock } = useAppSelector((state) => state.facility);
 
   const getPatientsByRisk = () => {
-    const low = patients.filter((p) => p.riskLevel === "low").length;
-    const medium = patients.filter((p) => p.riskLevel === "medium").length;
-    const high = patients.filter((p) => p.riskLevel === "high").length;
+    const low = patients.filter((p) => p.risk_level === "low").length;
+    const medium = patients.filter((p) => p.risk_level === "medium").length;
+    const high = patients.filter((p) => p.risk_level === "high").length;
     return { low, medium, high };
   };
 
   const getOverdueAppointments = () => {
     const today = new Date();
-    return patients.filter((p) => new Date(p.nextAppointment) < today).length;
+    return patients.filter((p) => new Date(p.next_appointment) < today).length;
   };
 
   const getDrugStockStatus = () => {
@@ -105,7 +105,7 @@ export default function AnalyticsManagement() {
                 <div className="w-32 bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-green-500 h-2 rounded-full"
-                    style={{ width: `${(riskData.low / patients.length) * 100}%` }}
+                    style={{ width: `${patients.length > 0 ? (riskData.low / patients.length) * 100 : 0}%` }}
                   ></div>
                 </div>
                 <span className="text-sm font-medium">{riskData.low}</span>
@@ -117,7 +117,7 @@ export default function AnalyticsManagement() {
                 <div className="w-32 bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-yellow-500 h-2 rounded-full"
-                    style={{ width: `${(riskData.medium / patients.length) * 100}%` }}
+                    style={{ width: `${patients.length > 0 ? (riskData.medium / patients.length) * 100 : 0}%` }}
                   ></div>
                 </div>
                 <span className="text-sm font-medium">{riskData.medium}</span>
@@ -129,7 +129,7 @@ export default function AnalyticsManagement() {
                 <div className="w-32 bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-red-500 h-2 rounded-full"
-                    style={{ width: `${(riskData.high / patients.length) * 100}%` }}
+                    style={{ width: `${patients.length > 0 ? (riskData.high / patients.length) * 100 : 0}%` }}
                   ></div>
                 </div>
                 <span className="text-sm font-medium">{riskData.high}</span>
@@ -191,7 +191,7 @@ export default function AnalyticsManagement() {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-text-body">Service Utilization</span>
-              <span className="font-medium">{Math.round((services.length / 6) * 100)}%</span>
+              <span className="font-medium">{services.length > 0 ? Math.round((services.length / 6) * 100) : 0}%</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-text-body">Patient Satisfaction</span>

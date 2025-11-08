@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAppSelector } from '../../store/hooks';
-import syncService from '../../lib/sync-service';
+import socketService from '../../lib/socket';
 import { Activity, Users, Wifi, WifiOff } from 'lucide-react';
 
 export default function RealTimeSync() {
@@ -11,7 +11,7 @@ export default function RealTimeSync() {
   useEffect(() => {
     // Monitor connection status
     const checkConnection = () => {
-      setIsConnected(syncService.isConnected());
+      setIsConnected(socketService.socket.connected);
     };
 
     const interval = setInterval(checkConnection, 1000);

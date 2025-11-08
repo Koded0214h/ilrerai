@@ -94,6 +94,41 @@ class AIService {
       ];
     }
   }
+  
+  async generateFacilityInsights(facilityData: any) {
+    try {
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [{
+            role: 'system',
+            content: 'You are a healthcare operations AI. Generate actionable insights for a primary healthcare center based on the data provided.'
+          }, {
+            role: 'user',
+            content: `Analyze this PHC data: ${JSON.stringify(facilityData)}. Provide 3 key insights to improve patient outreach, service utilization, and appointment adherence. Focus on practical, data-driven recommendations.`
+          }],
+          max_tokens: 500
+        })
+      });
+
+      const data = await response.json();
+      const insights = data.choices?.[0]?.message?.content || '';
+      return insights.split('\n').filter(line => line.trim()).slice(0, 3);
+    } catch (error) {
+      console.error('AI facility insights error:', error);
+      return [
+        'Review peak hours to optimize staff allocation',
+        'Target patients with high missed appointments for follow-up',
+        'Promote underutilized services to the community'
+      ];
+    }
+  }
+
 }
 
 export default new AIService();
