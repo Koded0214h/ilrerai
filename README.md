@@ -1,40 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# IlerAI - Healthcare Management System
+
+This is a full-stack healthcare management system with separate frontend and backend services.
+
+## Project Structure
+
+```
+ilerai/
+├── frontend/          # Next.js frontend application
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── ...
+├── backend/           # Express.js backend API
+│   ├── routes/
+│   ├── utils/
+│   ├── data/
+│   ├── package.json
+│   └── server.js
+└── start-dev.bat     # Start both servers
+```
 
 ## Getting Started
 
-First, run the development server:
-
+### Quick Start
+Run both servers with one command:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+start-dev.bat
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Manual Start
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+1. **Start Backend Server:**
+```bash
+cd backend
+npm install
+npm run dev
+```
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+2. **Start Frontend Server:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+## Access Points
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:5000
+- **Health Check**: http://localhost:5000/api/health
 
-## Learn More
+## Demo Credentials
 
-To learn more about Next.js, take a look at the following resources:
+**Staff Login:**
+- Email: any@email.com
+- Password: any
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+**Patient Login:**
+- Phone: +234-801-234-567
+- PIN: 1234
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Features
 
-## Deploy on Vercel
+- ✅ Dual authentication (Staff/Patient)
+- ✅ Patient management with real-time updates
+- ✅ Risk level assessment
+- ✅ Responsive design
+- ✅ Backend API integration
+- ✅ SQLite database with sample data
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Tech Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+- **Frontend**: Next.js 15, React 18, TypeScript, Tailwind CSS, Redux Toolkit
+- **Backend**: Express.js, SQLite, Node.js, Socket.IO
+- **Database**: SQLite with sample PHC and patient data

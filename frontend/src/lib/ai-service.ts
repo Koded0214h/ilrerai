@@ -1,0 +1,99 @@
+class AIService {
+  private apiKey = process.env.OPENAI_API_KEY;
+  private baseUrl = 'https://api.openai.com/v1';
+
+  async generateMedicationReminders(medications: any[], patientData: any) {
+    try {
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [{
+            role: 'system',
+            content: 'You are a healthcare AI assistant. Generate personalized medication reminders.'
+          }, {
+            role: 'user',
+            content: `Generate smart reminders for patient ${patientData.name} with medications: ${JSON.stringify(medications)}. Consider timing, food interactions, and adherence tips.`
+          }],
+          max_tokens: 300
+        })
+      });
+
+      const data = await response.json();
+      return data.choices?.[0]?.message?.content || 'Take your medications as prescribed.';
+    } catch (error) {
+      console.error('AI reminder error:', error);
+      return 'Remember to take your medications on time.';
+    }
+  }
+
+  async assessPatientRisk(patientData: any, medications: any[]) {
+    try {
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [{
+            role: 'system',
+            content: 'You are a healthcare AI that assesses patient risk levels. Return only: low, medium, or high.'
+          }, {
+            role: 'user',
+            content: `Assess risk for patient: ${JSON.stringify(patientData)}, medications: ${JSON.stringify(medications)}. Consider missed appointments, medication adherence, and health status.`
+          }],
+          max_tokens: 10
+        })
+      });
+
+      const data = await response.json();
+      const risk = data.choices?.[0]?.message?.content?.toLowerCase().trim();
+      return ['low', 'medium', 'high'].includes(risk) ? risk : 'medium';
+    } catch (error) {
+      console.error('AI risk assessment error:', error);
+      return 'medium';
+    }
+  }
+
+  async generateHealthInsights(patientData: any, medications: any[]) {
+    try {
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [{
+            role: 'system',
+            content: 'You are a healthcare AI providing personalized health insights and recommendations.'
+          }, {
+            role: 'user',
+            content: `Generate 3 personalized health insights for patient ${patientData.name} with risk level ${patientData.risk_level} and medications: ${JSON.stringify(medications)}. Focus on prevention and wellness.`
+          }],
+          max_tokens: 400
+        })
+      });
+
+      const data = await response.json();
+      const insights = data.choices?.[0]?.message?.content || '';
+      return insights.split('\n').filter(line => line.trim()).slice(0, 3);
+    } catch (error) {
+      console.error('AI insights error:', error);
+      return [
+        'Stay hydrated and maintain regular exercise',
+        'Follow your medication schedule consistently',
+        'Schedule regular check-ups with your healthcare provider'
+      ];
+    }
+  }
+}
+
+export default new AIService();

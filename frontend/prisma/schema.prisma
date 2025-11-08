@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Patient {
+  id                String   @id @default(cuid())
+  name              String
+  phone             String   @unique
+  state             String
+  missedAppointments Int     @default(0)
+  visitFrequency    Float    @default(1.0)
+  distance          Float    @default(0.0)
+  lastVisit         DateTime @default(now())
+  language          String   @default("english")
+  isLiterate        Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  appointments      Appointment[]
+  reminders         Reminder[]
+}
+
+model Appointment {
+  id        String   @id @default(cuid())
+  patientId String
+  date      DateTime
+  time      String
+  status    String   @default("scheduled")
+  createdAt DateTime @default(now())
+  
+  patient   Patient  @relation(fields: [patientId], references: [id])
+}
+
+model Reminder {
+  id        String   @id @default(cuid())
+  patientId String
+  type      String
+  message   String
+  sent      Boolean  @default(false)
+  sentAt    DateTime?
+  createdAt DateTime @default(now())
+  
+  patient   Patient  @relation(fields: [patientId], references: [id])
+}
+
+model PHC {
+  id               String  @id @default(cuid())
+  name             String
+  state            String
+  address          String
+  lat              Float
+  lng              Float
+  beds             Int     @default(0)
+  wards            Int     @default(0)
+  powerSource      String
+  waterSource      String
+  buildingCondition String
+  staffCount       Int     @default(0)
+  services         String
+}
