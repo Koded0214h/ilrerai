@@ -69,15 +69,7 @@ const render = (status: Status) => {
 };
 
 export default function GoogleMap() {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-  if (!apiKey) {
-    return (
-      <div className="w-full h-64 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-800">
-        Google Maps API key not configured
-      </div>
-    );
-  }
+  const apiKey = 'AIzaSyDUMMY_KEY_FOR_DEMO'; // Mock API key for demo
 
   return <Wrapper apiKey={apiKey} render={render} />;
 }

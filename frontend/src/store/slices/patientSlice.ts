@@ -10,6 +10,7 @@ interface Patient {
   risk_level: "low" | "medium" | "high";
   last_visit?: string;
   phc_name?: string;
+  medications?: string[];
 }
 
 interface PatientState {
@@ -22,10 +23,35 @@ interface PatientState {
 }
 
 const initialState: PatientState = {
-  patients: [],
-  totalPatients: 0,
-  highRiskCount: 0,
-  adherenceRate: 0,
+  patients: [
+    {
+      id: '1',
+      name: 'John Doe',
+      phone: '+1234567890',
+      risk_level: 'low' as const,
+      next_appointment: '2024-01-15',
+      medications: ['Aspirin', 'Lisinopril']
+    },
+    {
+      id: '2',
+      name: 'Jane Smith',
+      phone: '+1234567891',
+      risk_level: 'medium' as const,
+      next_appointment: '2024-01-10',
+      medications: ['Metformin', 'Insulin']
+    },
+    {
+      id: '3',
+      name: 'Bob Johnson',
+      phone: '+1234567892',
+      risk_level: 'high' as const,
+      next_appointment: '2024-01-05',
+      medications: ['Warfarin', 'Digoxin']
+    }
+  ],
+  totalPatients: 3,
+  highRiskCount: 1,
+  adherenceRate: 67,
   loading: false,
   error: null,
 };

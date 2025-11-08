@@ -1,65 +1,100 @@
 class ApiClient {
-  private baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  private baseUrl = 'https://ilmeen-backend.onrender.com';
+
+  // Dummy data for patients
+  private dummyPatients = [
+    {
+      id: '1',
+      name: 'John Doe',
+      phone: '+1234567890',
+      risk_level: 'low',
+      next_appointment: '2024-01-15',
+      medications: ['Aspirin', 'Lisinopril']
+    },
+    {
+      id: '2',
+      name: 'Jane Smith',
+      phone: '+1234567891',
+      risk_level: 'medium',
+      next_appointment: '2024-01-10',
+      medications: ['Metformin', 'Insulin']
+    },
+    {
+      id: '3',
+      name: 'Bob Johnson',
+      phone: '+1234567892',
+      risk_level: 'high',
+      next_appointment: '2024-01-05',
+      medications: ['Warfarin', 'Digoxin']
+    }
+  ];
 
   async get(endpoint: string) {
-    const response = await fetch(`${this.baseUrl}${endpoint}`);
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    const result = await response.json();
-    return result.success ? result.data : result;
+    // Return dummy data based on endpoint
+    if (endpoint === '/api/patient/list') {
+      return this.dummyPatients;
+    }
+    return { success: true, data: [] };
   }
 
   async post(endpoint: string, data: any) {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || `API Error: ${response.status}`);
-    return result.success ? result.data : result;
+    // Simulate successful responses with dummy data
+    if (endpoint === '/api/patient/remind') {
+      return { success: true, message: 'Reminders sent successfully' };
+    }
+    if (endpoint === '/api/patient/login') {
+      return { success: true, token: 'dummy-token', patient: this.dummyPatients[0] };
+    }
+    if (endpoint === '/api/patient/register') {
+      return { success: true, message: 'Patient registered successfully' };
+    }
+    if (endpoint === '/api/patient/verify') {
+      return { success: true, message: 'Patient verified successfully' };
+    }
+    if (endpoint === '/api/auth/register') {
+      return { success: true, message: 'Staff registered successfully' };
+    }
+    if (endpoint === '/api/auth/login') {
+      return { success: true, token: 'dummy-staff-token', user: { name: 'Staff User', email: data.email } };
+    }
+    return { success: true, data: {} };
   }
 
   async put(endpoint: string, data: any) {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    const result = await response.json();
-    return result.success ? result.data : result;
+    // Simulate successful update
+    return { success: true, message: 'Patient updated successfully' };
   }
 
   async getPatients() {
-    return this.get('/api/patient/list');
+    return this.dummyPatients;
   }
 
   async updatePatient(id: string, data: any) {
-    return this.put(`/api/patient/${id}`, data);
+    return { success: true, message: 'Patient updated successfully' };
   }
 
   async sendReminders(patientIds: string[], message: string) {
-    return this.post('/api/patient/remind', { patient_ids: patientIds, message });
+    return { success: true, message: 'Reminders sent successfully' };
   }
 
   async loginPatient(phone: string, pin: string) {
-    return this.post('/api/patient/login', { phone, pin });
+    return { success: true, token: 'dummy-token', patient: this.dummyPatients[0] };
   }
 
   async registerPatient(name: string, phone: string, pin: string) {
-    return this.post('/api/patient/register', { name, phone, pin });
+    return { success: true, message: 'Patient registered successfully' };
   }
 
   async verifyPatient(phone: string, code: string) {
-    return this.post('/api/patient/verify', { phone, code });
+    return { success: true, message: 'Patient verified successfully' };
   }
 
   async registerStaff(name: string, email: string, password: string) {
-    return this.post('/api/auth/register', { name, email, password });
+    return { success: true, message: 'Staff registered successfully' };
   }
 
   async loginStaff(email: string, password: string) {
-    return this.post('/api/auth/login', { email, password });
+    return { success: true, token: 'dummy-staff-token', user: { name: 'Staff User', email } };
   }
 }
 
