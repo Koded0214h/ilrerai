@@ -1,12 +1,16 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface User {
+export interface User {
   id: string;
   name: string;
-  email: string;
+  email?: string; // for staff
+  phone?: string; // for patient
   role: "staff" | "patient";
   facilityId?: string;
   patientId?: string;
+  risk_level?: "low" | "medium" | "high";
+  next_appointment?: string;
+  medications?: string[];
 }
 
 interface AuthState {

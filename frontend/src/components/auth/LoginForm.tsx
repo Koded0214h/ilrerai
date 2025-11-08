@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAppDispatch } from "../../store/hooks";
 import type { AppDispatch } from "../../store";
-import { loginSuccess } from "../../store/slices/authSlice";
+import { loginSuccess, type User } from "../../store/slices/authSlice";
 import { addAlert } from "../../store/slices/alertSlice";
 import apiClient from "../../lib/api-client";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
@@ -61,10 +61,17 @@ export default function LoginForm({ role, onBack }: LoginFormProps) {
           userData = await apiClient.loginPatient(email, password);
         }
         
-        const user = {
-          ...userData,
-          role: role as "patient" | "staff"
-        };
+        const user: User = role === "staff"
+          ? {
+              id: (userData as any).user.email,
+              name: (userData as any).user.name,
+              email: (userData as any).user.email,
+              role: role as "staff"
+            }
+          : {
+              ...(userData as any).patient,
+              role: role as "patient"
+            };
 
         dispatch(loginSuccess(user));
         dispatch(addAlert({

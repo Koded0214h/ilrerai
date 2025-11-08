@@ -130,8 +130,11 @@ const patientSlice = createSlice({
       })
       .addCase(fetchPatients.fulfilled, (state, action) => {
         state.loading = false;
-        state.patients = action.payload;
-        const stats = calculateStats(action.payload);
+        state.patients = action.payload.map(patient => ({
+          ...patient,
+          risk_level: patient.risk_level as "low" | "medium" | "high"
+        }));
+        const stats = calculateStats(state.patients);
         state.totalPatients = stats.totalPatients;
         state.highRiskCount = stats.highRiskCount;
         state.adherenceRate = stats.adherenceRate;
